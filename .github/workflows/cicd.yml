@@ -93,16 +93,6 @@ jobs:
     needs: build
     steps:
 
-      - name: Copy docker-compose.yml to EC2
-        working-directory: ./deploy
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.SSH_KEY }}
-          source: "docker-compose.yml"   
-          target: "/home/ubuntu/app/"    # directory on EC2
-
       - name: Deploy Docker Containers
         uses: appleboy/ssh-action@v1
         env:
@@ -114,7 +104,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           envs: BACKEND_IMAGE,FRONTEND_IMAGE
           script: |
-            cd ~/app
+            cd /home/ubuntu/app
             docker pull $BACKEND_IMAGE
             docker pull $FRONTEND_IMAGE
             docker-compose down
