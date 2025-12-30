@@ -99,8 +99,8 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.SSH_KEY }}
-          source: ./docker-compose.yml
-          target: ~/app/docker-compose.yml
+          source: ./docker-compose.yml   # relative to repo root
+          target: ~/app/                # directory on EC2
 
       - name: Deploy Docker Containers
         uses: appleboy/ssh-action@v1
