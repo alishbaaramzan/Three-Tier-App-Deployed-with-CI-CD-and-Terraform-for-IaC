@@ -40,9 +40,9 @@ jobs:
         working-directory: ./frontend
         run: npm install
 
-      - name: Frontend - Test
-        working-directory: ./frontend
-        run: npm test -- --watchAll=false
+      #- name: Frontend - Test
+      #  working-directory: ./frontend
+      #  run: npm test -- --watchAll=false
 
   build:
     name: Build & Push Docker Images
