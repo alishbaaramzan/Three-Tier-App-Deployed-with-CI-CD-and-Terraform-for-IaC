@@ -21,6 +21,10 @@ class Task(db.Model):
 with app.app_context():
     db.create_all()
 
+@app.route('/')
+def home():
+    return "hello", 200
+
 @app.route('/tasks', methods=['GET', 'POST'])
 def handle_tasks():
     if request.method == 'GET':

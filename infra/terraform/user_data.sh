@@ -1,36 +1,24 @@
-#! /bin/bash
+#! /usr/bin/bash
 
-# Add Docker's official GPG key:
-sudo apt update
-sudo apt install -y ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
-
-# Add the repository to Apt sources:
-sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
-Types: deb
-URIs: https://download.docker.com/linux/ubuntu
-Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
-Components: stable
-Signed-By: /etc/apt/keyrings/docker.asc
-EOF
+# export variables
+export REGION="us-east-1"
+export AWS_ACCOUNT_ID="289259597269"
+export BACKEND_IMAGE="$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/devops-backend:latest"
+export FRONTEND_IMAGE="$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/devops-frontend:latest"
 
 sudo apt update
-
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-sudo usermod -aG docker $USER
-
-sudo systemctl enable docker
-sudo systemctl start docker
-
-# Create app directory
-sudo mkdir -p /home/ubuntu/app
+sudo apt install -y docker.io docker-compose
+sudo usermod -aG docker ubuntu
+sudo apt install unzip -y
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
+mkdir -p /home/ubuntu/app
 cd /home/ubuntu/app
+touch compose.yml
+touch deploy.sh
 
-# Create docker-compose.yml
-sudo tee docker-compose.yml > /dev/null <<'COMPOSE_EOF'
+cat << EOF > compose.yml
 version: '3'
 services:
   devops_mariadb:
@@ -64,7 +52,7 @@ services:
         condition: service_healthy
 
   backend:
-    image: ${{ BACKEND_IMAGE }}
+    image: ${BACKEND_IMAGE}
     container_name: backend
     environment:
       - DB_USERNAME=test
@@ -78,7 +66,7 @@ services:
         condition: service_healthy
 
   frontend:
-    image: ${{ FRONTEND_IMAGE }}
+    image: ${FRONTEND_IMAGE}
     container_name: frontend
     environment:
       - REACT_APP_BACKEND_URL=http://localhost:5000
@@ -89,8 +77,17 @@ services:
 
 volumes:
   mariadb_data:
-COMPOSE_EOF
+EOF
 
-# Set proper ownership
-sudo chown -R ubuntu:ubuntu /home/ubuntu/app
+cat << EOF > deploy.sh
+aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 
+docker pull $FRONTEND_IMAGE
+docker pull $BACKEND_IMAGE
+
+docker compose down
+docker compose up -d
+
+EOF
+
+chmod u+x deploy.sh
