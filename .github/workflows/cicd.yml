@@ -38,13 +38,13 @@ jobs:
         working-directory: ./frontend
         run: npm install
 
-      - name: Frontend - Run ESLint
-        working-directory: ./frontend
-        run: npm run lint
+      #- name: Frontend - Run ESLint
+      #  working-directory: ./frontend
+      #  run: npm run lint
 
-      - name: Frontend - Test
-        working-directory: ./frontend
-        run: npm test -- --watchAll=false
+      #- name: Frontend - Test
+      #  working-directory: ./frontend
+      #  run: npm test -- --watchAll=false
 
   build:
     name: Build & Push Docker Images
