@@ -1,11 +1,5 @@
 #! /usr/bin/bash
 
-# export variables
-export REGION="us-east-1"
-export AWS_ACCOUNT_ID="289259597269"
-export BACKEND_IMAGE="$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/devops-backend:latest"
-export FRONTEND_IMAGE="$AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/devops-frontend:latest"
-
 sudo apt update
 sudo apt install -y docker.io docker-compose
 sudo usermod -aG docker ubuntu
@@ -85,9 +79,10 @@ aws ecr get-login-password --region $REGION | docker login --username AWS --pass
 docker pull $FRONTEND_IMAGE
 docker pull $BACKEND_IMAGE
 
-docker compose down
-docker compose up -d
+docker-compose down
+docker-compose up -d
 
 EOF
 
+sudo chown ubuntu:ubuntu deploy.sh
 chmod u+x deploy.sh
